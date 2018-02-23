@@ -1,6 +1,6 @@
 # getphpcscoverage
 
-A cli tool which compares a dir with a phpcs config and reports files which are not checked.
+A cli tool which compares a dir with a [phpcs](https://github.com/squizlabs/PHP_CodeSniffer) config and reports files which are not checked.
 
 ## Install
 
