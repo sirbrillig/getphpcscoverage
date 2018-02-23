@@ -1,12 +1,14 @@
 {
-  "name": "getphpcscoverage",
+  "name": "@sirbrillig/getphpcscoverage",
   "version": "1.0.0",
   "description": "A cli tool which compares a dir with a phpcs config and reports files which are not checked.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "bin": { "getphpcscoverage": "./index.js" },
+  "bin": {
+    "getphpcscoverage": "./index.js"
+  },
   "author": "Payton Swick <payton@foolord.com>",
   "license": "MIT",
   "devDependencies": {
