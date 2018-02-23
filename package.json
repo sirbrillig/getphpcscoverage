@@ -22,7 +22,7 @@
   "dependencies": {
     "lodash": "^4.17.5",
     "meow": "^4.0.0",
-    "path-reader": "^1.1.0",
+    "recursive-readdir": "^2.2.2",
     "xml2js": "^0.4.19"
   },
   "repository": {

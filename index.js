@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const pathReader = require('path-reader')
+const readPath = require('recursive-readdir')
 const xml2js = require('xml2js')
 const fs = require('fs')
 const { get, some } = require('lodash')
@@ -21,6 +21,7 @@ const cli = meow(`
     --version, -v  Show the version
     --type <type>, -t <type>  Only examine files with this type extension (php, js, etc.)
     --format <format>, -f <format>  Set output type (human, json)
+    --ignore <pattern>, -i <pattern>  Ignore files matching this pattern
 `, {
   flags: {
     version: {
@@ -42,6 +43,11 @@ const cli = meow(`
       type: 'string',
       alias: 'f',
       default: 'human'
+    },
+    ignore: {
+      type: 'string',
+      alias: 'i',
+      default: ''
     }
   }
 })
@@ -87,6 +93,11 @@ function getFilesFromXml (xmlFilePath) {
   })
 }
 
+function getFilesFromPath (directoryPath, options) {
+  const ignoreFiles = options.ignore ? [ `*${options.ignore}*` ] : []
+  return readPath(directoryPath, ignoreFiles)
+}
+
 function prependPathToPaths (prepend, paths) {
   return paths.map(path => fsPath.join(prepend, path))
 }
@@ -117,7 +128,7 @@ function jsonReport (found, notFound) {
 
 function scanDirectory (directoryPath, options) {
   const phpcsXmlPath = fsPath.join(directoryPath, 'phpcs.xml')
-  return Promise.all([pathReader.promiseFiles(directoryPath), getFilesFromXml(phpcsXmlPath)])
+  return Promise.all([getFilesFromPath(directoryPath, options), getFilesFromXml(phpcsXmlPath)])
     .then(results => {
       const files = filterByFileType(options.type, results[0])
       const paths = prependPathToPaths(fsPath.dirname(phpcsXmlPath), results[1])
