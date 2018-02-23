@@ -57,6 +57,13 @@ if (cli.flags.version) {
 
 const targetDir = cli.input[0] || '.'
 scanDirectory(targetDir, cli.flags)
+  .then(({found, notFound}) => {
+    switch (cli.flags.format) {
+      case 'human':
+        return humanReport(found, notFound)
+    }
+    throw new Error(`Unknown format: ${cli.flags.format}`)
+  })
   .catch(err => {
     console.error(`An error occurred while scanning the directory ${targetDir}:`)
     console.error(err)
@@ -109,6 +116,6 @@ function scanDirectory (directoryPath, options) {
       const paths = prependPathToPaths(fsPath.dirname(phpcsXmlPath), results[1])
       const found = filterByParentPaths(paths, files)
       const notFound = filterWithoutParentPaths(paths, files)
-      humanReport(found, notFound)
+      return {found, notFound}
     })
 }
