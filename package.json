@@ -1,6 +1,6 @@
 {
   "name": "@sirbrillig/getphpcscoverage",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A cli tool which compares a dir with a phpcs config and reports files which are not checked.",
   "main": "index.js",
   "scripts": {
