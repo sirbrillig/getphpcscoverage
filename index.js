@@ -5,12 +5,62 @@ const xml2js = require('xml2js')
 const fs = require('fs')
 const { get, some } = require('lodash')
 const fsPath = require('path')
+const meow = require('meow')
 
 const parser = new xml2js.Parser()
+const cli = meow(`
+  Usage
+    $ getphpcscoverage [directoryPath]
 
-const directoryPath = 'testdir'
-const phpcsXmlPath = 'testdir/phpcs.xml'
-const fileType = 'js'
+  Specify a directory path which contains a phpcs.xml config file. This will
+  report the files which will be scanned by the config file and those that will
+  not.
+
+  Options
+    --help, -h  Show this help message
+    --version, -v  Show the version
+    --type <type>, -t <type>  Only examine files with this type extension (php, js, etc.)
+    --format <format>, -f <format>  Set output type (human, json)
+`, {
+  flags: {
+    version: {
+      type: 'boolean',
+      alias: 'v',
+      default: false
+    },
+    help: {
+      type: 'boolean',
+      alias: 'h',
+      default: false
+    },
+    type: {
+      type: 'string',
+      alias: 't',
+      default: 'js'
+    },
+    format: {
+      type: 'string',
+      alias: 'f',
+      default: 'human'
+    }
+  }
+})
+
+if (cli.flags.help) {
+  cli.showHelp()
+  // showHelp automatically exits
+}
+if (cli.flags.version) {
+  cli.showVersion()
+  // showVersion automatically exits
+}
+
+const targetDir = cli.input[0] || '.'
+scanDirectory(targetDir, cli.flags)
+  .catch(err => {
+    console.error(`An error occurred while scanning the directory ${targetDir}:`)
+    console.error(err)
+  })
 
 function getFilesFromXml (xmlFilePath) {
   return new Promise((resolve, reject) => {
@@ -44,17 +94,21 @@ function filterWithoutParentPaths (parentPaths, paths) {
   return paths.filter(file => !some(parentPaths, parentPath => file.startsWith(parentPath)))
 }
 
-Promise.all([pathReader.promiseFiles(directoryPath), getFilesFromXml(phpcsXmlPath)])
-  .then(results => {
-    const files = filterByFileType(fileType, results[0])
-    const paths = prependPathToPaths(fsPath.dirname(phpcsXmlPath), results[1])
-    const found = filterByParentPaths(paths, files)
-    const notFound = filterWithoutParentPaths(paths, files)
-    console.log('found these:')
-    console.log(found)
-    console.log('did not find these:')
-    console.log(notFound)
-  })
-  .catch(err => {
-    console.error(err)
-  })
+function humanReport (found, notFound) {
+  console.log('found these:')
+  console.log(found)
+  console.log('did not find these:')
+  console.log(notFound)
+}
+
+function scanDirectory (directoryPath, options) {
+  const phpcsXmlPath = fsPath.join(directoryPath, 'phpcs.xml')
+  return Promise.all([pathReader.promiseFiles(directoryPath), getFilesFromXml(phpcsXmlPath)])
+    .then(results => {
+      const files = filterByFileType(options.type, results[0])
+      const paths = prependPathToPaths(fsPath.dirname(phpcsXmlPath), results[1])
+      const found = filterByParentPaths(paths, files)
+      const notFound = filterWithoutParentPaths(paths, files)
+      humanReport(found, notFound)
+    })
+}
