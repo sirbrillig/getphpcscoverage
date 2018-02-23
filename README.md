@@ -21,6 +21,7 @@ Usage
     --version, -v  Show the version
     --type <type>, -t <type>  Only examine files with this type extension (php, js, etc.)
     --format <format>, -f <format>  Set output type (human, json)
+    --ignore <pattern>, -i <pattern>  Ignore files matching this pattern
 ```
 
 ## Example
