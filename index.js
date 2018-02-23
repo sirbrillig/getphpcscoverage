@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const pathReader = require('path-reader')
 const xml2js = require('xml2js')
 const fs = require('fs')
