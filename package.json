@@ -24,5 +24,19 @@
     "meow": "^4.0.0",
     "path-reader": "^1.1.0",
     "xml2js": "^0.4.19"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sirbrillig/getphpcscoverage.git"
+  },
+  "keywords": [
+    "phpcs",
+    "php",
+    "linting",
+    "cli"
+  ],
+  "bugs": {
+    "url": "https://github.com/sirbrillig/getphpcscoverage/issues"
+  },
+  "homepage": "https://github.com/sirbrillig/getphpcscoverage#readme"
 }
