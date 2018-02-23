@@ -61,6 +61,8 @@ scanDirectory(targetDir, cli.flags)
     switch (cli.flags.format) {
       case 'human':
         return humanReport(found, notFound)
+      case 'json':
+        return jsonReport(found, notFound)
     }
     throw new Error(`Unknown format: ${cli.flags.format}`)
   })
@@ -106,6 +108,10 @@ function humanReport (found, notFound) {
   console.log(found)
   console.log('did not find these:')
   console.log(notFound)
+}
+
+function jsonReport (found, notFound) {
+  console.log(JSON.stringify({found, notFound}))
 }
 
 function scanDirectory (directoryPath, options) {
