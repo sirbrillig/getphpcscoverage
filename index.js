@@ -104,10 +104,11 @@ function filterWithoutParentPaths (parentPaths, paths) {
 }
 
 function humanReport (found, notFound) {
-  console.log('found these:')
-  console.log(found)
-  console.log('did not find these:')
-  console.log(notFound)
+  console.log('These files WILL be scanned by phpcs:')
+  found.map(file => console.log(file))
+  console.log('')
+  console.log('These files WILL NOT be scanned by phpcs:')
+  notFound.map(file => console.log(file))
 }
 
 function jsonReport (found, notFound) {
