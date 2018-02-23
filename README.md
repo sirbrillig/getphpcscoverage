@@ -32,12 +32,12 @@ testdir
 ├── phpcs.xml
 └── src
     ├── baz
-    │   ├── index-2.js
-    │   └── index.js
+    │   ├── index-2.php
+    │   └── index.php
     └── foobar
-        ├── index-2.js
-        ├── index-3.js
-        └── index.js
+        ├── index-2.php
+        ├── index-3.php
+        └── index.php
 
 $ cat testdir/phpcs.xml
 
@@ -46,17 +46,17 @@ $ cat testdir/phpcs.xml
  <description>Test library.</description>
  <rule ref="MyRuleset"/>
  <file>src/foobar</file>
- <file>src/baz/index-2.js</file>
+ <file>src/baz/index-2.php</file>
 </ruleset>
 
 $ getphpcscoverage testdir
 
 These files WILL be scanned by phpcs:
-testdir/src/foobar/index-2.js
-testdir/src/foobar/index-3.js
-testdir/src/foobar/index.js
-testdir/src/baz/index-2.js
+testdir/src/foobar/index-2.php
+testdir/src/foobar/index-3.php
+testdir/src/foobar/index.php
+testdir/src/baz/index-2.php
 
 These files WILL NOT be scanned by phpcs:
-testdir/src/baz/index.js
+testdir/src/baz/index.php
 ```

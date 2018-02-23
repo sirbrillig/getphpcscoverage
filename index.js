@@ -36,7 +36,7 @@ const cli = meow(`
     type: {
       type: 'string',
       alias: 't',
-      default: 'js'
+      default: 'php'
     },
     format: {
       type: 'string',
