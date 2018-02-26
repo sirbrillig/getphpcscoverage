@@ -62,6 +62,9 @@ if (cli.flags.version) {
 }
 
 const targetDir = cli.input[0] || '.'
+const getFilesFromXml = getXmlReader({readFile: fs.readFile, parseXmlString: parser.parseString})
+const getFilesFromPath = getPathReader({readFilesFromPath: readPath})
+const scanDirectory = getDirectoryScanner({getFilesFromXml, getFilesFromPath})
 scanDirectory(targetDir, cli.flags)
   .then(({found, notFound}) => {
     switch (cli.flags.format) {
@@ -139,16 +142,16 @@ function getPercent (found, notFound) {
   return Number.parseInt((found.length / totalCount) * 100, 10)
 }
 
-function scanDirectory (directoryPath, options) {
-  const phpcsXmlPath = fsPath.join(directoryPath, 'phpcs.xml')
-  const getFilesFromXml = getXmlReader({readFile: fs.readFile, parseXmlString: parser.parseString})
-  const getFilesFromPath = getPathReader({readPath})
-  return Promise.all([getFilesFromPath(directoryPath, options), getFilesFromXml(phpcsXmlPath)])
-    .then(results => {
-      const files = filterByFileType(options.type, results[0])
-      const paths = prependPathToPaths(fsPath.dirname(phpcsXmlPath), results[1])
-      const found = filterByParentPaths(paths, files)
-      const notFound = filterWithoutParentPaths(paths, files)
-      return {found, notFound}
-    })
+function getDirectoryScanner ({getFilesFromXml, getFilesFromPath}) {
+  return function scanDirectory (directoryPath, options) {
+    const phpcsXmlPath = fsPath.join(directoryPath, 'phpcs.xml')
+    return Promise.all([getFilesFromPath(directoryPath, options), getFilesFromXml(phpcsXmlPath)])
+      .then(results => {
+        const files = filterByFileType(options.type, results[0])
+        const paths = prependPathToPaths(fsPath.dirname(phpcsXmlPath), results[1])
+        const found = filterByParentPaths(paths, files)
+        const notFound = filterWithoutParentPaths(paths, files)
+        return {found, notFound}
+      })
+  }
 }
