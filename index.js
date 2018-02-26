@@ -77,20 +77,22 @@ scanDirectory(targetDir, cli.flags)
     console.error(err)
   })
 
-function getFilesFromXml (xmlFilePath) {
-  return new Promise((resolve, reject) => {
-    fs.readFile(xmlFilePath, (err, data) => {
-      if (err) {
-        return reject(err)
-      }
-      parser.parseString(data, (err, result) => {
+function getXmlReader ({readFile, parseXmlString}) {
+  return function getFilesFromXml (xmlFilePath) {
+    return new Promise((resolve, reject) => {
+      readFile(xmlFilePath, (err, data) => {
         if (err) {
           return reject(err)
         }
-        resolve(get(result, 'ruleset.file', []))
+        parseXmlString(data, (err, result) => {
+          if (err) {
+            return reject(err)
+          }
+          resolve(get(result, 'ruleset.file', []))
+        })
       })
     })
-  })
+  }
 }
 
 function getFilesFromPath (directoryPath, options) {
@@ -137,6 +139,7 @@ function getPercent (found, notFound) {
 
 function scanDirectory (directoryPath, options) {
   const phpcsXmlPath = fsPath.join(directoryPath, 'phpcs.xml')
+  const getFilesFromXml = getXmlReader({readFile: fs.readFile, parseXmlString: parser.parseString})
   return Promise.all([getFilesFromPath(directoryPath, options), getFilesFromXml(phpcsXmlPath)])
     .then(results => {
       const files = filterByFileType(options.type, results[0])
