@@ -155,3 +155,9 @@ function getDirectoryScanner ({getFilesFromXml, getFilesFromPath}) {
       })
   }
 }
+
+module.exports = {
+  getDirectoryScanner,
+  getXmlReader,
+  getPathReader
+}
