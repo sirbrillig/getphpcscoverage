@@ -4,7 +4,7 @@
   "description": "A cli tool which compares a dir with a phpcs config and reports files which are not checked.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "bin": {
     "getphpcscoverage": "./index.js"
@@ -17,7 +17,8 @@
     "eslint-plugin-import": "^2.9.0",
     "eslint-plugin-node": "^6.0.1",
     "eslint-plugin-promise": "^3.6.0",
-    "eslint-plugin-standard": "^3.0.1"
+    "eslint-plugin-standard": "^3.0.1",
+    "jest": "^22.4.2"
   },
   "dependencies": {
     "lodash": "^4.17.5",
