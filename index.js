@@ -95,9 +95,11 @@ function getXmlReader ({readFile, parseXmlString}) {
   }
 }
 
-function getFilesFromPath (directoryPath, options) {
-  const ignoreFiles = options.ignore ? [ `*${options.ignore}*` ] : []
-  return readPath(directoryPath, ignoreFiles)
+function getPathReader ({readFilesFromPath}) {
+  return function getFilesFromPath (directoryPath, options) {
+    const ignoreFiles = options.ignore ? [ `*${options.ignore}*` ] : []
+    return readFilesFromPath(directoryPath, ignoreFiles)
+  }
 }
 
 function prependPathToPaths (prepend, paths) {
@@ -140,6 +142,7 @@ function getPercent (found, notFound) {
 function scanDirectory (directoryPath, options) {
   const phpcsXmlPath = fsPath.join(directoryPath, 'phpcs.xml')
   const getFilesFromXml = getXmlReader({readFile: fs.readFile, parseXmlString: parser.parseString})
+  const getFilesFromPath = getPathReader({readPath})
   return Promise.all([getFilesFromPath(directoryPath, options), getFilesFromXml(phpcsXmlPath)])
     .then(results => {
       const files = filterByFileType(options.type, results[0])
