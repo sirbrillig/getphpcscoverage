@@ -7,7 +7,6 @@ const { get, some } = require('lodash')
 const fsPath = require('path')
 const meow = require('meow')
 
-const parser = new xml2js.Parser()
 const cli = meow(`
   Usage
     $ getphpcscoverage [directoryPath]
@@ -62,6 +61,7 @@ if (cli.flags.version) {
 }
 
 const targetDir = cli.input[0] || '.'
+const parser = new xml2js.Parser()
 const getFilesFromXml = getXmlReader({readFile: fs.readFile, parseXmlString: parser.parseString})
 const getFilesFromPath = getPathReader({readFilesFromPath: readPath})
 const scanDirectory = getDirectoryScanner({getFilesFromXml, getFilesFromPath})
