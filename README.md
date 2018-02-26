@@ -60,4 +60,6 @@ testdir/src/baz/index-2.php
 
 These files WILL NOT be scanned by phpcs:
 testdir/src/baz/index.php
+
+That's a coverage of 80%
 ```
