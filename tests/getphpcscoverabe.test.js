@@ -111,3 +111,22 @@ test('includes files matching type option', () => {
       ])
     })
 })
+
+test('includes matching files if using patterns', () => {
+  const patterns = [
+    'testdir/src/foobar/.*\\.php$',
+    'baz/index-2.*'
+  ]
+  const getFilesFromPath = getPathReader({readFilesFromPath: mockReadPath})
+  const scanDirectory = getDirectoryScanner({patterns, getFilesFromPath})
+  const targetDir = 'testdir'
+  return scanDirectory(targetDir, {})
+    .then(({found, notFound}) => {
+      expect(found).toEqual([
+        'testdir/src/foobar/index-1.php',
+        'testdir/src/foobar/index-2.php',
+        'testdir/src/foobar/index-3.php',
+        'testdir/src/baz/index-2.php'
+      ])
+    })
+})
