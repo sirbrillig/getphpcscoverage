@@ -70,74 +70,61 @@ if (cli.flags.version) {
   // showVersion automatically exits
 }
 
+function performScanWithPaths (targetDir, flags) {
+  const parser = new xml2js.Parser()
+  const getFilesFromXml = getXmlReader({readFile: fs.readFile, parseXmlString: parser.parseString})
+  const getFilesFromPath = getPathReader({readFilesFromPath: readPath})
+  const scanDirectory = getDirectoryScanner({getFilesFromXml, getFilesFromPath})
+  performScan(targetDir, scanDirectory, flags)
+}
+
+function performScanWithPatterns (targetDir, flags, patterns) {
+  const getFilesFromPath = getPathReader({readFilesFromPath: readPath})
+  const scanDirectory = getDirectoryScanner({patterns, getFilesFromPath})
+  performScan(targetDir, scanDirectory, flags)
+}
+
+function performScan (targetDir, scanDirectory, flags) {
+  scanDirectory(targetDir, flags)
+    .then(({found, notFound}) => {
+      switch (flags.format) {
+        case 'human':
+          return humanReport(found, notFound)
+        case 'json':
+          return jsonReport(found, notFound)
+      }
+      throw new Error(`Unknown format: ${flags.format}`)
+    })
+    .catch(err => {
+      console.error(`An error occurred while scanning the directory ${targetDir}:`)
+      console.error(err)
+    })
+}
+
+function getDataFromStdin () {
+  return new Promise((resolve) => {
+    let data = ''
+    process.stdin.setEncoding('utf-8')
+    process.stdin.on('readable', () => {
+      let chunk = process.stdin.read()
+      while (chunk) {
+        data += chunk
+        chunk = process.stdin.read()
+      }
+    })
+    process.stdin.on('end', () => {
+      data = data.replace(/\n$/, '')
+      resolve(data)
+    })
+  })
+}
+
 const targetDir = cli.input[0] || '.'
-const parser = new xml2js.Parser()
 if (!process.stdin.isTTY) {
-  let data = ''
-  process.stdin.setEncoding('utf-8')
-  process.stdin.on('readable', () => {
-    let chunk = process.stdin.read()
-    while (chunk) {
-      data += chunk
-      chunk = process.stdin.read()
-    }
-  })
-  process.stdin.on('end', () => {
-    data = data.replace(/\n$/, '')
-    const patterns = JSON.parse(data)
-    const getFilesFromPath = getPathReader({readFilesFromPath: readPath})
-    const scanDirectory = getDirectoryScanner({patterns, getFilesFromPath})
-    scanDirectory(targetDir, cli.flags)
-      .then(({found, notFound}) => {
-        switch (cli.flags.format) {
-          case 'human':
-            return humanReport(found, notFound)
-          case 'json':
-            return jsonReport(found, notFound)
-        }
-        throw new Error(`Unknown format: ${cli.flags.format}`)
-      })
-      .catch(err => {
-        console.error(`An error occurred while scanning the directory ${targetDir}:`)
-        console.error(err)
-      })
-  })
+  getDataFromStdin()
+    .then(data => performScanWithPatterns(targetDir, cli.flags, JSON.parse(data)))
+} else if (cli.flags.patterns) {
+  performScanWithPatterns(targetDir, cli.flags, JSON.parse(cli.flags.patterns))
 } else {
-  if (cli.flags.patterns) {
-    const patterns = JSON.parse(cli.flags.patterns)
-    const getFilesFromPath = getPathReader({readFilesFromPath: readPath})
-    const scanDirectory = getDirectoryScanner({patterns, getFilesFromPath})
-    scanDirectory(targetDir, cli.flags)
-      .then(({found, notFound}) => {
-        switch (cli.flags.format) {
-          case 'human':
-            return humanReport(found, notFound)
-          case 'json':
-            return jsonReport(found, notFound)
-        }
-        throw new Error(`Unknown format: ${cli.flags.format}`)
-      })
-      .catch(err => {
-        console.error(`An error occurred while scanning the directory ${targetDir}:`)
-        console.error(err)
-      })
-  } else {
-    const getFilesFromXml = getXmlReader({readFile: fs.readFile, parseXmlString: parser.parseString})
-    const getFilesFromPath = getPathReader({readFilesFromPath: readPath})
-    const scanDirectory = getDirectoryScanner({getFilesFromXml, getFilesFromPath})
-    scanDirectory(targetDir, cli.flags)
-      .then(({found, notFound}) => {
-        switch (cli.flags.format) {
-          case 'human':
-            return humanReport(found, notFound)
-          case 'json':
-            return jsonReport(found, notFound)
-        }
-        throw new Error(`Unknown format: ${cli.flags.format}`)
-      })
-      .catch(err => {
-        console.error(`An error occurred while scanning the directory ${targetDir}:`)
-        console.error(err)
-      })
-  }
+  performScanWithPaths(targetDir, cli.flags)
 }
