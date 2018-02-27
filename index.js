@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
-const readPath = require('recursive-readdir')
-const xml2js = require('xml2js')
-const fs = require('fs')
-const {getXmlReader, getPathReader, getDirectoryScanner} = require('./lib/index')
-const {humanReport, jsonReport} = require('./lib/reporters')
+const {
+  getDataFromStdin,
+  performScanWithPatterns,
+  performScanWithPaths
+} = require('./lib/index')
 const meow = require('meow')
 
 const cli = meow(`
@@ -68,55 +68,6 @@ if (cli.flags.help) {
 if (cli.flags.version) {
   cli.showVersion()
   // showVersion automatically exits
-}
-
-function performScanWithPaths (targetDir, flags) {
-  const parser = new xml2js.Parser()
-  const getFilesFromXml = getXmlReader({readFile: fs.readFile, parseXmlString: parser.parseString})
-  const getFilesFromPath = getPathReader({readFilesFromPath: readPath})
-  const scanDirectory = getDirectoryScanner({getFilesFromXml, getFilesFromPath})
-  performScan(targetDir, scanDirectory, flags)
-}
-
-function performScanWithPatterns (targetDir, flags, patterns) {
-  const getFilesFromPath = getPathReader({readFilesFromPath: readPath})
-  const scanDirectory = getDirectoryScanner({patterns, getFilesFromPath})
-  performScan(targetDir, scanDirectory, flags)
-}
-
-function performScan (targetDir, scanDirectory, flags) {
-  scanDirectory(targetDir, flags)
-    .then(({found, notFound}) => {
-      switch (flags.format) {
-        case 'human':
-          return humanReport(found, notFound)
-        case 'json':
-          return jsonReport(found, notFound)
-      }
-      throw new Error(`Unknown format: ${flags.format}`)
-    })
-    .catch(err => {
-      console.error(`An error occurred while scanning the directory ${targetDir}:`)
-      console.error(err)
-    })
-}
-
-function getDataFromStdin () {
-  return new Promise((resolve) => {
-    let data = ''
-    process.stdin.setEncoding('utf-8')
-    process.stdin.on('readable', () => {
-      let chunk = process.stdin.read()
-      while (chunk) {
-        data += chunk
-        chunk = process.stdin.read()
-      }
-    })
-    process.stdin.on('end', () => {
-      data = data.replace(/\n$/, '')
-      resolve(data)
-    })
-  })
 }
 
 const targetDir = cli.input[0] || '.'
