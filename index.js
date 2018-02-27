@@ -25,7 +25,7 @@ const cli = meow(`
     --help, -h  Show this help message
     --version, -v  Show the version
     --type <type>, -t <type>  Only examine files with this type extension (defaults to php)
-    --format <format>, -f <format>  Set output type (human, json)
+    --format <format>, -f <format>  Set output type (human, json, percent)
     --ignore <pattern>, -i <pattern>  Ignore files matching this pattern
     --patterns <patterns> Report on files matching any of the patterns (which should be a JSON list)
 `, {
