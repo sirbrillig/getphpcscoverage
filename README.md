@@ -16,12 +16,16 @@ Usage
   report the files which will be scanned by the config file and those that will
   not.
 
+  If --patterns is used, those patterns will be used instead of the paths in
+  the phpcs.xml file.
+
   Options
     --help, -h  Show this help message
     --version, -v  Show the version
-    --type <type>, -t <type>  Only examine files with this type extension (php, js, etc.)
+    --type <type>, -t <type>  Only examine files with this type extension (defaults to php)
     --format <format>, -f <format>  Set output type (human, json)
     --ignore <pattern>, -i <pattern>  Ignore files matching this pattern
+    --patterns <patterns> Report on files matching any of the patterns (which should be a JSON list)
 ```
 
 ## Example

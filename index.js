@@ -15,12 +15,16 @@ const cli = meow(`
   report the files which will be scanned by the config file and those that will
   not.
 
+  If --patterns is used, those patterns will be used instead of the paths in
+  the phpcs.xml file.
+
   Options
     --help, -h  Show this help message
     --version, -v  Show the version
-    --type <type>, -t <type>  Only examine files with this type extension (php, js, etc.)
+    --type <type>, -t <type>  Only examine files with this type extension (defaults to php)
     --format <format>, -f <format>  Set output type (human, json)
     --ignore <pattern>, -i <pattern>  Ignore files matching this pattern
+    --patterns <patterns> Report on files matching any of the patterns (which should be a JSON list)
 `, {
   flags: {
     version: {
@@ -43,6 +47,9 @@ const cli = meow(`
       alias: 'f',
       default: 'human'
     },
+    patterns: {
+      type: 'string'
+    },
     ignore: {
       type: 'string',
       alias: 'i',
@@ -62,20 +69,40 @@ if (cli.flags.version) {
 
 const targetDir = cli.input[0] || '.'
 const parser = new xml2js.Parser()
-const getFilesFromXml = getXmlReader({readFile: fs.readFile, parseXmlString: parser.parseString})
-const getFilesFromPath = getPathReader({readFilesFromPath: readPath})
-const scanDirectory = getDirectoryScanner({getFilesFromXml, getFilesFromPath})
-scanDirectory(targetDir, cli.flags)
-  .then(({found, notFound}) => {
-    switch (cli.flags.format) {
-      case 'human':
-        return humanReport(found, notFound)
-      case 'json':
-        return jsonReport(found, notFound)
-    }
-    throw new Error(`Unknown format: ${cli.flags.format}`)
-  })
-  .catch(err => {
-    console.error(`An error occurred while scanning the directory ${targetDir}:`)
-    console.error(err)
-  })
+if (cli.flags.patterns) {
+  const patterns = JSON.parse(cli.flags.patterns)
+  const getFilesFromPath = getPathReader({readFilesFromPath: readPath})
+  const scanDirectory = getDirectoryScanner({patterns, getFilesFromPath})
+  scanDirectory(targetDir, cli.flags)
+    .then(({found, notFound}) => {
+      switch (cli.flags.format) {
+        case 'human':
+          return humanReport(found, notFound)
+        case 'json':
+          return jsonReport(found, notFound)
+      }
+      throw new Error(`Unknown format: ${cli.flags.format}`)
+    })
+    .catch(err => {
+      console.error(`An error occurred while scanning the directory ${targetDir}:`)
+      console.error(err)
+    })
+} else {
+  const getFilesFromXml = getXmlReader({readFile: fs.readFile, parseXmlString: parser.parseString})
+  const getFilesFromPath = getPathReader({readFilesFromPath: readPath})
+  const scanDirectory = getDirectoryScanner({getFilesFromXml, getFilesFromPath})
+  scanDirectory(targetDir, cli.flags)
+    .then(({found, notFound}) => {
+      switch (cli.flags.format) {
+        case 'human':
+          return humanReport(found, notFound)
+        case 'json':
+          return jsonReport(found, notFound)
+      }
+      throw new Error(`Unknown format: ${cli.flags.format}`)
+    })
+    .catch(err => {
+      console.error(`An error occurred while scanning the directory ${targetDir}:`)
+      console.error(err)
+    })
+}
