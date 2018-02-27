@@ -19,6 +19,9 @@ Usage
   If --patterns is used, those patterns will be used instead of the paths in
   the phpcs.xml file.
 
+  If you pipe input to getphpcscoverage it will be assumed to be patterns in
+  which case it is not necessary to use the --patterns option.
+
   Options
     --help, -h  Show this help message
     --version, -v  Show the version
