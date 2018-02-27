@@ -70,3 +70,49 @@ testdir/src/baz/index.php
 
 That's a coverage of 80%
 ```
+
+Here's an example using the configuration from an [arclint file](https://secure.phabricator.com/book/phabricator/article/arcanist_lint/) instead of the phpcs.xml file:
+
+(PS: it uses [jq](https://stedolan.github.io/jq/), which I think is awesome.)
+
+```
+$ tree testdir
+
+testdir
+├── phpcs.xml
+└── src
+    ├── baz
+    │   ├── index-2.php
+    │   └── index.php
+    └── foobar
+        ├── index-2.php
+        ├── index-3.php
+        └── index.php
+
+$ cat .arclint
+
+{
+  "linters": {
+    "phpcs": {
+      "type": "phpcs",
+        "include" : [
+          "(testdir/src/foobar/.*\\.php$)",
+          "(src/baz/index-2.*)"
+        ]
+    }
+  }
+}
+
+$ cat .arclint | jq '.linters.phpcs.include' -c | getphpcscoverage testdir
+
+These files WILL be scanned by phpcs:
+testdir/src/foobar/index-2.php
+testdir/src/foobar/index-3.php
+testdir/src/foobar/index.php
+testdir/src/baz/index-2.php
+
+These files WILL NOT be scanned by phpcs:
+testdir/src/baz/index.php
+
+That's a coverage of 80%
+```
