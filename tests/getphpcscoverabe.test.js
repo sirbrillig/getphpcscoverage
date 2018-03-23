@@ -19,9 +19,8 @@ function mockReadPath (path, ignoreFiles) {
   if (!ignoreFiles.length) {
     return Promise.resolve(mockData)
   }
-  // convert glob pattern to regexp (poorly)
-  const ignorePattern = ignoreFiles[0].substring(1, ignoreFiles[0].length - 1)
-  return Promise.resolve(mockData.filter(file => !file.match(ignorePattern)))
+  const fileFilter = ignoreFiles[0]
+  return Promise.resolve(mockData.filter(file => !fileFilter(file)))
 }
 
 test('finds matching files', () => {
@@ -79,6 +78,20 @@ test('skips files matching ignore option', () => {
       expect(found).toEqual([
         'testdir/src/foobar/index-1.php',
         'testdir/src/foobar/index-3.php'
+      ])
+    })
+})
+
+test('skips files matching multiple ignore options', () => {
+  const parser = new xml2js.Parser()
+  const getFilesFromXml = getXmlReader({readFile: mockReadFile, parseXmlString: parser.parseString})
+  const getFilesFromPath = getPathReader({readFilesFromPath: mockReadPath})
+  const scanDirectory = getDirectoryScanner({getFilesFromXml, getFilesFromPath})
+  const targetDir = 'testdir'
+  return scanDirectory(targetDir, { ignore: '2|3' })
+    .then(({found, notFound}) => {
+      expect(found).toEqual([
+        'testdir/src/foobar/index-1.php'
       ])
     })
 })
